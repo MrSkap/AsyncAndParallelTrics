@@ -20,3 +20,9 @@ Console.WriteLine("\n \n");
 // Пример использовая Task.Run() и распараллеливания вычислительных задач
 // + сравнение скорости выполнения синхронного и асинхронного варианта выполнения
 await example.DoSomeHardCalculatedJobsAsync();
+
+Console.WriteLine("\n \n");
+
+
+// Пример различных способов ожидания задач
+await example.RunSomeTasksAndDoActionsWhenItComplete();

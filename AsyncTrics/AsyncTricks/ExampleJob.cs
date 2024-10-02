@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using AsyncTricks.Calculations;
+using AsyncTricks.Execution;
 using AsyncTricks.Loader;
 
 namespace AsyncTricks;
@@ -79,6 +80,12 @@ public class ExampleJob
         await _asyncSorter.SortCollectionsAndCollectionOfCollectionsAsync(exampleData);
         watch.Stop();
         Console.WriteLine($"Complete: {watch.ElapsedMilliseconds}ms");
+    }
+
+    public async Task RunSomeTasksAndDoActionsWhenItComplete()
+    {
+        var spammer = new TaskSpammer();
+        await spammer.SpamTasksAndWriteWhenTheyComplete(10);
     }
 
     private static List<List<int>> GenerateData(int headListSize, int innerListSize, int seed)
