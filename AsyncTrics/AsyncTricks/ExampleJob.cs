@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using AsyncTricks.Calculations;
+using AsyncTricks.Cancellation;
 using AsyncTricks.Execution;
 using AsyncTricks.Loader;
 
@@ -13,6 +14,7 @@ public class ExampleJob
     private readonly SizeOfResponseExtractor _sizeOfResponseExtractor = new();
     private readonly BigCollectionsSorter _asyncSorter = new();
     private readonly SyncCollectionSorter _syncSorter = new();
+    private readonly LongOperationsCanceller _longOperationsCanceller = new();
     
     /// <summary>
     /// Пример для сравнения работы Task.WhenAll Task.WhenAny и синхронного варианта.
@@ -86,6 +88,24 @@ public class ExampleJob
     {
         var spammer = new TaskSpammer();
         await spammer.SpamTasksAndWriteWhenTheyComplete(10);
+    }
+
+    public async Task RunOperationsAndCancelThem()
+    {
+        Console.WriteLine("Run operation and show how it looks like successfully");
+        await _longOperationsCanceller.StartOperationsAndCancelIfItTooLongAsync(4, 4500);
+        
+        Console.WriteLine();
+        
+        Console.WriteLine("Run operation and cancel it after 3 sec of waiting with inner cancellation");
+        await _longOperationsCanceller.StartOperationsAndCancelIfItTooLongAsync(7, 3000);
+        
+        Console.WriteLine();
+        
+        Console.WriteLine("Run operation and cancel it after 3 sec of waiting with external cancellation");
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(3000);
+        await _longOperationsCanceller.StartOperationsAndCancelIfItTooLongAsync(7, 5000, cts.Token);
     }
 
     private static List<List<int>> GenerateData(int headListSize, int innerListSize, int seed)

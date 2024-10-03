@@ -23,6 +23,10 @@ await example.DoSomeHardCalculatedJobsAsync();
 
 Console.WriteLine("\n \n");
 
-
 // Пример различных способов ожидания задач
 await example.RunSomeTasksAndDoActionsWhenItComplete();
+
+Console.WriteLine("\n \n");
+
+// Пример отмены операции
+await example.RunOperationsAndCancelThem();
