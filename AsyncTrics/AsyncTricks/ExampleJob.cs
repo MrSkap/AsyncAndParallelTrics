@@ -121,6 +121,15 @@ public class ExampleJob
         await longOperationExecutor.ExecuteAsync();
     }
 
+    public async Task RunNotAwaitableTaskAndFailIt()
+    {
+        using var cts = new CancellationTokenSource();
+        Console.WriteLine("Start failing operation");
+        WaitAndThrowAsync(1000, new Exception(), cts.Token).DoNotWait(cts.Token);
+        await Task.Delay(1200, cts.Token);
+        Console.WriteLine("End of method that call failed operation");
+    }
+
     private async Task WaitAndThrowAsync(int waitMs, Exception? exceptionToThrow, CancellationToken cancellationToken)
     {
         await Task.Delay(waitMs, cancellationToken);

@@ -33,3 +33,7 @@ await example.RunOperationsAndCancelThem();
 
 // Пример долговыполняемой операции
 await example.RunLongOperationAsync();
+
+// Пример запуска аснихронной операции без ожидания
+// и обработка исключения при ее завершении с ошибкой
+await example.RunNotAwaitableTaskAndFailIt();
