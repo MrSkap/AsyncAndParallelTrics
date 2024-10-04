@@ -14,11 +14,12 @@ public class TaskSpammer
         var tasksWithNoLock = GenerateTasks(tasksCount);
         var tasksForWaitingWithNoLock = TaskRunner.RunAndDoActionAsync(tasksWithNoLock, DoAfterComplete);
         await Task.WhenAll(tasksForWaitingWithNoLock);
-        
+
         Console.WriteLine("\n");
         Console.WriteLine("Do with Task.WhenAny");
         var tasksWithWhenAny = GenerateTasks(tasksCount);
-        var tasksForWaitingWithWhenAny = TaskRunner.RunAndDoActionWhenAnyCompleteAsync(tasksWithWhenAny, DoAfterComplete);
+        var tasksForWaitingWithWhenAny =
+            TaskRunner.RunAndDoActionWhenAnyCompleteAsync(tasksWithWhenAny, DoAfterComplete);
         await Task.WhenAll(tasksForWaitingWithWhenAny);
     }
 
@@ -27,10 +28,7 @@ public class TaskSpammer
         var random = new Random();
         var waitTimeForTasks = Enumerable.Range(0, tasksCount).Select(x => random.Next(0, 1000)).ToList();
         Console.WriteLine($"Wait time for tasks: {string.Join("; ", waitTimeForTasks)}");
-        foreach (var time in waitTimeForTasks)
-        {
-            yield return WaitAndReturnMessage(time);
-        }
+        foreach (var time in waitTimeForTasks) yield return WaitAndReturnMessage(time);
     }
 
     private async Task<string> WaitAndReturnMessage(int waitTimeMs)

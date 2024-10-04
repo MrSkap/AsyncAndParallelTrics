@@ -8,11 +8,9 @@ public static class TaskRunner
         var inputTasks = tasks.ToList();
 
         foreach (var task in inputTasks)
-        {
             // can cause lock
             task.ContinueWith(action, cancellationToken, TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
-        }
 
         return inputTasks;
     }
@@ -38,15 +36,14 @@ public static class TaskRunner
         };
 
         foreach (var inputTask in inputTasks)
-        {
             inputTask.ContinueWith(continuation, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously,
                 TaskScheduler.Default);
-        }
 
         return results;
     }
 
-    public static async Task<List<Task<T>>> RunAndDoActionWhenAnyCompleteAsync<T>(IEnumerable<Task<T>> tasks, Action<Task<T>> action,
+    public static async Task<List<Task<T>>> RunAndDoActionWhenAnyCompleteAsync<T>(IEnumerable<Task<T>> tasks,
+        Action<Task<T>> action,
         CancellationToken cancellationToken = default)
     {
         var activeTasks = tasks.ToList();

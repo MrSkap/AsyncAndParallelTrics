@@ -1,6 +1,6 @@
 namespace AsyncTricks.Calculations;
 
-public class SyncCollectionSorter:ISorter
+public class SyncCollectionSorter : ISorter
 {
     public Task<List<List<int>>> SortCollectionsAndCollectionOfCollectionsAsync(List<List<int>> listOfLists)
     {

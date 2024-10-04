@@ -30,3 +30,6 @@ Console.WriteLine("\n \n");
 
 // Пример отмены операции
 await example.RunOperationsAndCancelThem();
+
+// Пример долговыполняемой операции
+await example.RunLongOperationAsync();

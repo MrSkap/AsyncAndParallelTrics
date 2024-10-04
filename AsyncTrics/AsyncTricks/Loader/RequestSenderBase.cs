@@ -25,7 +25,7 @@ public class RequestSenderBase : IDisposable
     }
 
     /// <summary>
-    /// Оправить запрос.
+    ///     Оправить запрос.
     /// </summary>
     /// <param name="url">Урла.</param>
     /// <returns>Ответ.</returns>
