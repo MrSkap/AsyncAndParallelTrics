@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using AsyncTricks.AsyncIterator;
 using AsyncTricks.Calculations;
 using AsyncTricks.Cancellation;
 using AsyncTricks.Execution;
@@ -14,6 +15,7 @@ namespace AsyncTricks;
 public class ExampleJob
 {
     private readonly BigCollectionsSorter _asyncSorter = new();
+    private readonly CompareWriter _compareWriter = new();
     private readonly LongOperationsCanceller _longOperationsCanceller = new();
     private readonly SizeOfResponseExtractor _sizeOfResponseExtractor = new();
     private readonly SyncCollectionSorter _syncSorter = new();
@@ -128,6 +130,29 @@ public class ExampleJob
         WaitAndThrowAsync(1000, new Exception(), cts.Token).DoNotWait(cts.Token);
         await Task.Delay(1200, cts.Token);
         Console.WriteLine("End of method that call failed operation");
+    }
+
+    public async Task ShowAsyncEnumerableProfitAsync()
+    {
+        Console.WriteLine("Start sync generation and comparing");
+        var watch = Stopwatch.StartNew();
+        await _compareWriter.GeneratePairsAndCompareAllThanWriteResult(5, 1000, 0, 100, CancellationToken.None);
+        watch.Stop();
+        Console.WriteLine($"Complete: {watch.ElapsedMilliseconds}ms");
+
+        Console.WriteLine();
+        Console.WriteLine("Start async generation and sync comparing");
+        watch.Restart();
+        await _compareWriter.GeneratePairsAndCompareViaForeachAsync(5, 1000, 0, 100, CancellationToken.None);
+        watch.Stop();
+        Console.WriteLine($"Complete: {watch.ElapsedMilliseconds}ms");
+
+        Console.WriteLine();
+        Console.WriteLine("Start async generation and parallel comparing");
+        watch.Restart();
+        await _compareWriter.GeneratePairsAndCompareViaParallelForeachAsync(5, 1000, 0, 100, CancellationToken.None);
+        watch.Stop();
+        Console.WriteLine($"Complete: {watch.ElapsedMilliseconds}ms");
     }
 
     private async Task WaitAndThrowAsync(int waitMs, Exception? exceptionToThrow, CancellationToken cancellationToken)
