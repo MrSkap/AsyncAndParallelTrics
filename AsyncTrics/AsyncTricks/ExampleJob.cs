@@ -2,6 +2,7 @@ using System.Diagnostics;
 using AsyncTricks.AsyncIterator;
 using AsyncTricks.Calculations;
 using AsyncTricks.Cancellation;
+using AsyncTricks.ConcurrentCollections;
 using AsyncTricks.Execution;
 using AsyncTricks.Loader;
 using AsyncTricks.LongOperations;
@@ -19,6 +20,7 @@ public class ExampleJob
     private readonly LongOperationsCanceller _longOperationsCanceller = new();
     private readonly SizeOfResponseExtractor _sizeOfResponseExtractor = new();
     private readonly SyncCollectionSorter _syncSorter = new();
+    private readonly CollectionFiller _collectionFiller = new CollectionFiller(10, 30);
 
     /// <summary>
     ///     Пример для сравнения работы Task.WhenAll Task.WhenAny и синхронного варианта.
@@ -153,6 +155,47 @@ public class ExampleJob
         await _compareWriter.GeneratePairsAndCompareViaParallelForeachAsync(5, 1000, 0, 100, CancellationToken.None);
         watch.Stop();
         Console.WriteLine($"Complete: {watch.ElapsedMilliseconds}ms");
+    }
+
+    public async Task CreateAndFillConcurrentCollections()
+    {
+        Console.WriteLine("Get Concurrent Dictionary");
+        var dictionary = await _collectionFiller.GetDictionaryAsync();
+        Console.WriteLine($"Dictionary is \n");
+        dictionary.ToList().ForEach(x => Console.WriteLine($"{x.Key} - {x.Value}"));
+        
+        Console.WriteLine();
+        
+        Console.WriteLine("Get Concurrent Queue");
+        var queue = await _collectionFiller.GetQueueAsync();
+        var res = string.Empty;
+        while (queue.TryDequeue(out var elem))
+        {
+            res += $" {elem}";
+        }
+        Console.WriteLine($"Queue is \n {res}");
+        
+        Console.WriteLine();
+        
+        Console.WriteLine("Get Concurrent Bag");
+        var bag = await _collectionFiller.GetBagAsync();
+        res = string.Empty;
+        while (bag.TryTake(out var elem))
+        {
+            res += $" {elem}";
+        }
+        Console.WriteLine($"Bag is \n {res}");
+        
+        Console.WriteLine();
+        
+        Console.WriteLine("Get Concurrent Stack");
+        var stack = await _collectionFiller.GetStackAsync();
+        res = string.Empty;
+        while (stack.TryPop(out var elem))
+        {
+            res += $" {elem}";
+        }
+        Console.WriteLine($"Stack is \n {res}");
     }
 
     private async Task WaitAndThrowAsync(int waitMs, Exception? exceptionToThrow, CancellationToken cancellationToken)

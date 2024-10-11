@@ -40,3 +40,6 @@ await example.RunNotAwaitableTaskAndFailIt();
 
 // Пример использования IAsyncEnumerable
 await example.ShowAsyncEnumerableProfitAsync();
+
+// Пример использования потокобезопасных коллекций
+await example.CreateAndFillConcurrentCollections();
