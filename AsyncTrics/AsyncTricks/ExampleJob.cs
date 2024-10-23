@@ -7,6 +7,7 @@ using AsyncTricks.Execution;
 using AsyncTricks.Loader;
 using AsyncTricks.LongOperations;
 using AsyncTricks.NotWaitingOperations;
+using AsyncTricks.SyncTasks;
 
 namespace AsyncTricks;
 
@@ -16,11 +17,13 @@ namespace AsyncTricks;
 public class ExampleJob
 {
     private readonly BigCollectionsSorter _asyncSorter = new();
+    private readonly CollectionFiller _collectionFiller = new(10, 30);
     private readonly CompareWriter _compareWriter = new();
+    private readonly ElementsProcessor _lockProcessor = new LockElementsProcessor();
     private readonly LongOperationsCanceller _longOperationsCanceller = new();
+    private readonly ElementsProcessor _semaphoreProcessor = new SemaphoreElementsProcessor();
     private readonly SizeOfResponseExtractor _sizeOfResponseExtractor = new();
     private readonly SyncCollectionSorter _syncSorter = new();
-    private readonly CollectionFiller _collectionFiller = new CollectionFiller(10, 30);
 
     /// <summary>
     ///     Пример для сравнения работы Task.WhenAll Task.WhenAny и синхронного варианта.
@@ -161,41 +164,61 @@ public class ExampleJob
     {
         Console.WriteLine("Get Concurrent Dictionary");
         var dictionary = await _collectionFiller.GetDictionaryAsync();
-        Console.WriteLine($"Dictionary is \n");
+        Console.WriteLine("Dictionary is \n");
         dictionary.ToList().ForEach(x => Console.WriteLine($"{x.Key} - {x.Value}"));
-        
+
         Console.WriteLine();
-        
+
         Console.WriteLine("Get Concurrent Queue");
         var queue = await _collectionFiller.GetQueueAsync();
         var res = string.Empty;
-        while (queue.TryDequeue(out var elem))
-        {
-            res += $" {elem}";
-        }
+        while (queue.TryDequeue(out var elem)) res += $" {elem}";
         Console.WriteLine($"Queue is \n {res}");
-        
+
         Console.WriteLine();
-        
+
         Console.WriteLine("Get Concurrent Bag");
         var bag = await _collectionFiller.GetBagAsync();
         res = string.Empty;
-        while (bag.TryTake(out var elem))
-        {
-            res += $" {elem}";
-        }
+        while (bag.TryTake(out var elem)) res += $" {elem}";
         Console.WriteLine($"Bag is \n {res}");
-        
+
         Console.WriteLine();
-        
+
         Console.WriteLine("Get Concurrent Stack");
         var stack = await _collectionFiller.GetStackAsync();
         res = string.Empty;
-        while (stack.TryPop(out var elem))
-        {
-            res += $" {elem}";
-        }
+        while (stack.TryPop(out var elem)) res += $" {elem}";
         Console.WriteLine($"Stack is \n {res}");
+    }
+
+    public async Task CreateAndSyncProcessElementsAsync()
+    {
+        var elements = GenerateElements(10);
+
+        Console.WriteLine("Start process elements with lock synchronizer");
+        var addLockTask = _lockProcessor.AddElementsAsync(elements);
+        var processLockTask = _lockProcessor.ProcessElementsAsync();
+        var getLockTask = _lockProcessor.GetElementsAsync();
+
+        await Task.WhenAll(addLockTask, processLockTask, getLockTask);
+
+        Console.WriteLine("Start process elements with semaphore synchronizer");
+        var addSemTask = _semaphoreProcessor.AddElementsAsync(elements);
+        var processSemTask = _semaphoreProcessor.ProcessElementsAsync();
+        var getSemTask = _semaphoreProcessor.GetElementsAsync();
+
+        await Task.WhenAll(addSemTask, processSemTask, getSemTask);
+    }
+
+    private List<ProcessElement> GenerateElements(int count)
+    {
+        return Enumerable.Range(0, count)
+            .Select(x => new ProcessElement
+            {
+                Id = Guid.NewGuid(),
+                Name = $"Element {x}"
+            }).ToList();
     }
 
     private async Task WaitAndThrowAsync(int waitMs, Exception? exceptionToThrow, CancellationToken cancellationToken)

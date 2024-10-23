@@ -1,19 +1,73 @@
 namespace AsyncTricks.SyncTasks;
 
-public class SemaphoreElementsProcessor: ElementsProcessor
+/// <summary>
+///     Синхронный обработчик элеменнов через SemaphoreSlim.
+/// </summary>
+public class SemaphoreElementsProcessor : ElementsProcessor, IDisposable
 {
-    public override Task ProcessElementsAsync()
+    private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+
+    /// <inheritdoc />
+    public void Dispose()
     {
-        throw new NotImplementedException();
+        _semaphoreSlim.Dispose();
     }
 
-    public override Task AddElementsAsync()
+    /// <inheritdoc />
+    public override async Task ProcessElementsAsync()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Process elements in semaphore");
+
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            while (ProcessElements.TryDequeue(out var element))
+            {
+                ProcessedElements.Add(element);
+                Console.WriteLine($"Name - {element.Name} ID - {element.Id}");
+                Thread.Sleep(500);
+            }
+        }
+        finally
+        {
+            Console.WriteLine("Release semaphore");
+            _semaphoreSlim.Release();
+        }
     }
 
-    public override Task GetElementsAsync()
+    /// <inheritdoc />
+    public override async Task AddElementsAsync(IEnumerable<ProcessElement> elements)
     {
-        throw new NotImplementedException();
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            Console.WriteLine("Add new elements in semaphore");
+            foreach (var element in elements)
+            {
+                ProcessElements.Enqueue(element);
+                Thread.Sleep(500);
+            }
+        }
+        finally
+        {
+            Console.WriteLine("Release semaphore");
+            _semaphoreSlim.Release();
+        }
+    }
+
+    /// <inheritdoc />
+    public override async Task<IEnumerable<ProcessElement>> GetElementsAsync()
+    {
+        Console.WriteLine("Wait for releasing elements in semaphore");
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            return ProcessElements;
+        }
+        finally
+        {
+            Console.WriteLine("Release semaphore");
+            _semaphoreSlim.Release();
+        }
     }
 }

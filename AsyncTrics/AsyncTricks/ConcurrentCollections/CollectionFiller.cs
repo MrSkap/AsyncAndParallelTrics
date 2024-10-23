@@ -3,11 +3,14 @@ using System.Collections.Concurrent;
 namespace AsyncTricks.ConcurrentCollections;
 
 /// <summary>
-/// Получение конкурентных коллекций.
+///     Получение конкурентных коллекций.
 /// </summary>
 /// <param name="maxSize">Максимальный размер коллекции.</param>
 /// <param name="addIterations"> Количество попыток добавления элементов.</param>
-/// <remarks>Все элементы добавляются асинхронно, поэтому итоговое количество может быть больше заданного! Если попыток больше чем размер коллекции, то один из элементов будет заменен новым.</remarks>
+/// <remarks>
+///     Все элементы добавляются асинхронно, поэтому итоговое количество может быть больше заданного! Если попыток
+///     больше чем размер коллекции, то один из элементов будет заменен новым.
+/// </remarks>
 public class CollectionFiller(int maxSize, int addIterations)
 {
     private readonly string[] _names =

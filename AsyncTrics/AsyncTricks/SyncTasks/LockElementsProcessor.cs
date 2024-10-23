@@ -1,19 +1,57 @@
 namespace AsyncTricks.SyncTasks;
 
-public class LockElementsProcessor: ElementsProcessor
+/// <summary>
+///     Синхронный обработчик эелментов через lock.
+/// </summary>
+public class LockElementsProcessor : ElementsProcessor
 {
+    private readonly object _lockObj = new();
+
+    /// <inheritdoc />
     public override Task ProcessElementsAsync()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Process elements in lock");
+        lock (_lockObj)
+        {
+            while (ProcessElements.TryDequeue(out var element))
+            {
+                ProcessedElements.Add(element);
+                Console.WriteLine($"Name - {element.Name} ID - {element.Id}");
+                Thread.Sleep(500);
+            }
+
+            Console.WriteLine("End of lock");
+        }
+
+        return Task.CompletedTask;
     }
 
-    public override Task AddElementsAsync()
+    /// <inheritdoc />
+    public override Task AddElementsAsync(IEnumerable<ProcessElement> elements)
     {
-        throw new NotImplementedException();
+        lock (_lockObj)
+        {
+            Console.WriteLine("Add new elements in lock");
+            foreach (var element in elements)
+            {
+                ProcessElements.Enqueue(element);
+                Thread.Sleep(500);
+            }
+
+            Console.WriteLine("End of lock");
+        }
+
+        return Task.CompletedTask;
     }
 
-    public override Task GetElementsAsync()
+    /// <inheritdoc />
+    public override Task<IEnumerable<ProcessElement>> GetElementsAsync()
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Wait for releasing elements in lock");
+        lock (_lockObj)
+        {
+            Console.WriteLine("End of lock");
+            return Task.FromResult<IEnumerable<ProcessElement>>(ProcessedElements);
+        }
     }
 }

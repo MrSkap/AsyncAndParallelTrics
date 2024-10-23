@@ -43,3 +43,6 @@ await example.ShowAsyncEnumerableProfitAsync();
 
 // Пример использования потокобезопасных коллекций
 await example.CreateAndFillConcurrentCollections();
+
+// Пример использования блокировок для синхронизации контекста
+await example.CreateAndSyncProcessElementsAsync();
