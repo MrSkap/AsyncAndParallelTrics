@@ -46,3 +46,6 @@ await example.CreateAndFillConcurrentCollections();
 
 // Пример использования блокировок для синхронизации контекста
 await example.CreateAndSyncProcessElementsAsync();
+
+// Пример использования ContinueWith
+await example.ContinueWithWritingRandomNumberAsync();

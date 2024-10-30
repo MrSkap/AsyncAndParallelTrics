@@ -3,6 +3,7 @@ using AsyncTricks.AsyncIterator;
 using AsyncTricks.Calculations;
 using AsyncTricks.Cancellation;
 using AsyncTricks.ConcurrentCollections;
+using AsyncTricks.ContinueWith;
 using AsyncTricks.Execution;
 using AsyncTricks.Loader;
 using AsyncTricks.LongOperations;
@@ -209,6 +210,28 @@ public class ExampleJob
         var getSemTask = _semaphoreProcessor.GetElementsAsync();
 
         await Task.WhenAll(addSemTask, processSemTask, getSemTask);
+    }
+
+    public async Task ContinueWithWritingRandomNumberAsync()
+    {
+        var random = new Random();
+        await GetIntAsync(random).DoAfter(x => Console.WriteLine($"Get int {x}"));
+        await GetIntAsync(random).DoAfter(WriteIntAsync);
+        await GetIntAsync(random).WriteResultAsync();
+        return;
+
+        async Task<int> GetIntAsync(Random r)
+        {
+            await Task.Delay(1000);
+            return r.Next();
+        }
+
+        async Task<int> WriteIntAsync(int value)
+        {
+            await Task.Delay(1000);
+            Console.WriteLine(value);
+            return value;
+        }
     }
 
     private List<ProcessElement> GenerateElements(int count)
